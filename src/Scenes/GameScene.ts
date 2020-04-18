@@ -8,30 +8,72 @@ import J_Piece from "../Prefabs/Pieces/J";
 import L_Piece from "../Prefabs/Pieces/L";
 import BasePiece from "../Prefabs/Pieces/BasePiece";
 import Board from "../Prefabs/Board";
-import { getMatrix } from "../Utils/matrix";
 import Config from "../Config";
+import PiecePreview from "../Prefabs/PiecePreview";
+import Score from "../Prefabs/Score";
+import TitleScene from "./TitleScene";
+import { NormalizedInputEvent } from "../Engine/InputManager";
 
-const availablePieces = [O_Piece, Z_Piece, T_Piece, I_Piece, S_Piece, J_Piece, L_Piece];
+const availablePieces = [
+  O_Piece,
+  Z_Piece,
+  T_Piece,
+  I_Piece,
+  S_Piece,
+  J_Piece,
+  L_Piece,
+];
+
+enum States {
+  PLAYING,
+  SCORING,
+  PAUSED,
+  GAME_OVER
+}
 
 class GameScene extends Scene {
-
+  private nextPieces?: BasePiece[];
   private currentPiece?: BasePiece;
   private pieces: BasePiece[] = [];
-  private Board?: Board;
-  
-  private Speed = 500;
+  private Board: Board;
+  private NextPiecePreview?: PiecePreview;
+  private State: States = States.PLAYING;
+  private Score?: Score;
+
+  private Speed = 300;
   public create() {
+    this.nextPieces = [];
     this.spawnPiece();
-    this.Board = new Board(this.canvas);
+    this.Board = new Board(this.rough);
+    this.NextPiecePreview = new PiecePreview(this.rough, this.graphics);
+    this.Score = new Score(this.graphics);
 
-    window.addEventListener("keydown", this._handleKeyboardInput);
+    this.Engine.InputManager.on(NormalizedInputEvent.ANY, this.handleInput);
   }
 
-  private spawnPiece() {
-    const piece = availablePieces[Math.floor(Math.random() * 100) % availablePieces.length];
-
-    this.currentPiece = new piece(this.canvas, {x: Math.floor(Config.Columns / 2), y: 1})
+  public unload() {
+    this.Engine.InputManager.off(NormalizedInputEvent.ANY, this.handleInput)
   }
+
+  private spawnPiece = () => {
+    //@ts-ignore
+    const randomPiece = (): BasePiece =>
+      new availablePieces[
+        Math.floor(Math.random() * 100) % availablePieces.length
+      ](this.rough, { x: 0, y: 0 });
+
+    if (this.nextPieces.length === 0) {
+      for (let i = 0; i < 3; i++) {
+        this.nextPieces.push(randomPiece());
+      }
+    }
+
+    const startPosition = { x: Math.floor(Config.Columns / 2), y: 1 };
+    this.currentPiece = this.nextPieces.shift();
+    this.nextPieces.push(randomPiece());
+
+    this.currentPiece.Position = startPosition;
+  };
 
   private timeSinceLastDown: number = 0;
   private _shouldMoveDown(dt: number): boolean {
@@ -45,53 +87,98 @@ class GameScene extends Scene {
     return true;
   }
 
-  private _handleKeyboardInput = (e: KeyboardEvent) => {
-    const matrix = this.getBoardMatrix();
-    switch(e.key) {
-      case "ArrowRight":
-        this.currentPiece?.move(1, 0, matrix);
+  private handleInput = ({detail: action}: {detail: NormalizedInputEvent}) => {
+    switch (action) {
+      case NormalizedInputEvent.RIGHT:
+        this.currentPiece?.move(1, 0, this.Board.Matrix);
         break;
-      case "ArrowLeft":
-        this.currentPiece?.move(-1, 0, matrix);
+      case NormalizedInputEvent.LEFT:
+        this.currentPiece?.move(-1, 0, this.Board.Matrix);
         break;
-      case "ArrowDown":
-        const moved = this.currentPiece?.move(0, 1, matrix);
+      case NormalizedInputEvent.DOWN:
+        const moved = this.currentPiece?.move(0, 1, this.Board.Matrix);
         if (moved) this.timeSinceLastDown = 0;
         break;
-      case " ":
+      case NormalizedInputEvent.ACTION:
+        if (this.State === States.GAME_OVER) {
+          this.restartGame();
+          return;
+        }
         this.currentPiece?.rotate();
         break;
     }
+  };
+
+  private _checkGameOver(): boolean {
+    const matrix = this.Board.Matrix;
+    for (let x = 0; x < Config.Columns; x++) {
+      if (matrix[x][0]) {
+        this._gameOver();
+        return true;
+      }
+    }
+    return false;
   }
 
-  private getBoardMatrix = (): boolean[][] => {
-    const matrix = getMatrix(Config.Columns, Config.Rows, false);
-    
-    this.pieces.forEach((piece) => {
-      const blocks = piece.getOccupiedCells();
-      blocks.forEach(([x, y]) => matrix[x][y] = true);
-    });
-    return matrix;
+  private restartGame = () => {
+    this.Engine.startScene(TitleScene)
+  }
+  private _gameOver() {
+    this.State = States.GAME_OVER;
   }
 
   public update(dt: number) {
-    if (!this.currentPiece) {
-      this.spawnPiece();
+    if (this.State === States.PLAYING) {
+      if (!this.currentPiece) {
+        this.spawnPiece();
+      }
+  
+      if (this.currentPiece && this._shouldMoveDown(dt)) {
+        const moved = this.currentPiece.move(0, 1, this.Board.Matrix);
+        if (!moved) {
+          this.Board.addPiece(this.currentPiece);
+          this.currentPiece = undefined;
+
+          this.State = States.SCORING;
+        }
+      }
     }
-    
-    if(this.currentPiece && this._shouldMoveDown(dt)) {
-      const moved = this.currentPiece.move(0, 1, this.getBoardMatrix());
-      if (!moved) {
-        this.pieces.push(this.currentPiece);
-        this.currentPiece = undefined;
+
+    if (this.State === States.SCORING) {
+      const scored = this.Board.removeFirstFullLine();
+
+      if (!scored) {
+        if (!this._checkGameOver()) {
+          this.State = States.PLAYING;
+        }
+
+      } else {
+        this.Score.add(100);
+        this.Speed -= 20;
       }
     }
   }
 
   public render() {
-    this.currentPiece?.render();
     this.Board?.render();
+    this.currentPiece?.render();
     this.pieces.forEach((piece) => piece.render());
+    this.NextPiecePreview?.render(this.nextPieces);
+    this.Score.render();
+
+    if (this.State === States.GAME_OVER) {
+      this.graphics.save();
+      this.graphics.fillStyle = "rgba(255, 255, 255, 0.7)";
+      this.graphics.fillRect(0, 0, Config.Resolution.width, Config.Resolution.height);
+      
+      this.graphics.font = "25px 'Press Start 2P'";
+      this.graphics.fillStyle = "rgb(0, 0, 0)";
+      this.graphics.textAlign = "center";
+      this.graphics.textBaseline = "bottom";
+      this.graphics.fillText("GAME OVER", Config.Resolution.width / 2 - 32, Config.Resolution.height / 2);
+      
+      this.graphics.restore();
+    }
   }
 }
 

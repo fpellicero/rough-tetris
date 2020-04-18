@@ -28,7 +28,7 @@ abstract class BasePiece {
   abstract Blocks: IBlocks;
   protected rotation: TRotation = 0;
 
-  constructor(protected graphics: RoughCanvas, protected Position: Position) {}
+  constructor(protected graphics: RoughCanvas, public Position: Position) {}
 
   public getOccupiedCells(position: Position = this.Position) {
     const blocks = this.Blocks[this.rotation];
@@ -53,7 +53,7 @@ abstract class BasePiece {
    * @param {Array<Array<boolean>>} y Number of vertical cells movement
    * @returns {boolean} True if could move, false otherwise
    */
-  public move(x: number, y: number, boardMatrix: boolean[][]): boolean {
+  public move(x: number, y: number, boardMatrix: string[][]): boolean {
     const nextPosition = {
       x: this.Position.x + x,
       y: this.Position.y + y,
@@ -101,7 +101,6 @@ abstract class BasePiece {
           hachureAngle: 60 + this.rotation,
           fillWeight: 0.5,
           hachureGap: 3,
-          maxRandomnessOffset: 0
         }
       );
     });

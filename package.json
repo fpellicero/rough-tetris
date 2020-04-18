@@ -28,6 +28,11 @@
   "devDependencies": {
     "@types/animejs": "^3.1.0",
     "@types/mathjs": "^6.0.5",
-    "mathjs": "^6.6.3"
+    "mathjs": "^6.6.3",
+    "swipe-listener": "^1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fpellicero/rough-tetris.git"
   }
 }

@@ -1,24 +1,31 @@
-import { RoughCanvas } from "roughjs/bin/canvas";
+import Engine from "../Engine/Engine";
 
-abstract class Scene {
-  protected Seed: number = 1;
-  private seedChangeInterval: number;
-  constructor(protected canvas: RoughCanvas) {
-    // @ts-ignore
-    this.seedChangeInterval  = setInterval(() => {
-      this.Seed = Math.floor(Math.random() * 1000);
-    }, 500)
+class Scene {
+  protected get rough() {
+    return this.Engine.roughCanvas;
   }
 
-  unload() {
-    clearInterval(this.seedChangeInterval);
+  protected get graphics() {
+    return this.Engine.canvas.getContext("2d");
   }
 
-  public abstract create(): void;
+  constructor(protected Engine: Engine) {}
 
-  public abstract update(dt: number): void;
+  public create(): void {
 
-  public abstract render(): void;
+  }
+
+  public unload(): void {
+
+  }
+
+  public update(dt: number): void {
+
+  }
+
+  public render(): void {
+    
+  }
 }
 
 export default Scene;

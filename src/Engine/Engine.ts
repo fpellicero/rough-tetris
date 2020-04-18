@@ -4,6 +4,8 @@ import { RoughCanvas } from "roughjs/bin/canvas";
 import Scene from "../Scenes/Scene";
 import TitleScene from "../Scenes/TitleScene";
 import GameScene from '../Scenes/GameScene';
+import Config from '../Config';
+import InputManager from './InputManager';
 
 /**
  * This class will be our Game Engine.
@@ -13,30 +15,38 @@ import GameScene from '../Scenes/GameScene';
  *  - Controls the Game Loop
  */
 class Engine {
-  private canvas: HTMLCanvasElement = this._createCanvas();
-  private roughCanvas: RoughCanvas;
+  public canvas: HTMLCanvasElement = this._createCanvas();
+  public roughCanvas: RoughCanvas;
+  public InputManager = new InputManager()
   private activeScenes: Scene[] = [];
-  private lastFrameTime: number = Date.now();
+  private lastFrameTime: number = performance.now();
 
   constructor() {
     
     this.roughCanvas = rough.canvas(this.canvas);
     
-    this.activeScenes.push(new GameScene(this.roughCanvas));
+    this.activeScenes.push(new TitleScene(this));
 
     this.activeScenes.forEach((scene) => scene.create());
     
     // Start the game loop
-    setInterval(this.update, 1000 / 30);
+    window.requestAnimationFrame(this.update);
   }
   
   private _createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement("canvas");
-    canvas.width = 360;
-    canvas.height = 640;
+    canvas.width = Config.Resolution.width;
+    canvas.height = Config.Resolution.height;
 
     document.body.appendChild(canvas);
     return canvas;
+  }
+
+  public startScene(NextScene: typeof Scene) {
+    this.activeScenes.forEach(s => s.unload());
+
+    this.activeScenes = [new NextScene(this)];
+    this.activeScenes.forEach(s => s.create());
   }
 
   private clearCanvas() {
@@ -50,8 +60,13 @@ class Engine {
   }
   
   private update = () => {
-    const now = Date.now();
-    const dt = Date.now() - this.lastFrameTime;
+    const now = performance.now();
+    const dt = now - this.lastFrameTime;
+
+    if (dt < 1000 / Config.FPS) {
+      window.requestAnimationFrame(this.update);
+      return;
+    }
     
     // Empty for redraw
     this.clearCanvas();
@@ -67,7 +82,7 @@ class Engine {
     });
 
     this.lastFrameTime = now;
-    // window.requestAnimationFrame(this.update);
+    window.requestAnimationFrame(this.update);
   }
 }
 

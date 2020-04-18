@@ -1,8 +1,10 @@
 import Scene from "./Scene";
-import { RoughCanvas } from "roughjs/bin/canvas";
+import Config from "../Config";
+import anime from "animejs";
+import GameScene from "./GameScene";
+import { NormalizedInputEvent } from "../Engine/InputManager";
 
 class TitleScene extends Scene {
-  private boxSize = 16;
   private colors = {
     T: "red",
     E: "green",
@@ -10,116 +12,150 @@ class TitleScene extends Scene {
     I: "blue",
     S: "orange",
   };
+
+  private textOpacity = 0;
+  private TitlePosition = {x: 65, y: 0};
   public update(dt: number) {}
 
   public create() {
+    let textAnim = anime({
+      targets: this,
+      textOpacity: 1,
+      direction: 'alternate',
+      easing: 'linear',
+      duration: 1000,
+      loop: true,
+      autoplay: false,
+    });
 
+    anime({
+      targets: this.TitlePosition,
+      y: 200,
+      easing: 'easeOutBounce',
+      duration: 1000,
+      complete: () => textAnim.play()
+    });
+
+    this.Engine.InputManager.on(NormalizedInputEvent.ACTION, this.startGame);
+  }
+
+  public unload() {
+    this.Engine.InputManager.off(NormalizedInputEvent.ACTION, this.startGame);
+  }
+
+  private startGame = () => {
+    this.Engine.startScene(GameScene);
   }
 
   private renderT(x: number, y: number) {
-    this.canvas.polygon(
+    this.rough.polygon(
       [
         [x, y],
-        [x + this.boxSize * 3, y],
-        [x + this.boxSize * 3, y + this.boxSize],
-        [x + this.boxSize * 2, y + this.boxSize],
-        [x + this.boxSize * 2, y + this.boxSize * 3],
-        [x + this.boxSize, y + this.boxSize * 3],
-        [x + this.boxSize, y + this.boxSize],
-        [x, y + this.boxSize],
+        [x + Config.blockSize * 3, y],
+        [x + Config.blockSize * 3, y + Config.blockSize],
+        [x + Config.blockSize * 2, y + Config.blockSize],
+        [x + Config.blockSize * 2, y + Config.blockSize * 3],
+        [x + Config.blockSize, y + Config.blockSize * 3],
+        [x + Config.blockSize, y + Config.blockSize],
+        [x, y + Config.blockSize],
         [x, y],
       ],
-      { fill: this.colors.T, seed: this.Seed }
+      { fill: this.colors.T }
     );
   }
 
   private renderE(x: number, y: number) {
-    const gapSize = (3 / 5) * this.boxSize;
-    this.canvas.polygon(
+    const gapSize = (3 / 5) * Config.blockSize;
+    this.rough.polygon(
       [
         [x, y],
-        [x + this.boxSize * 2, y],
-        [x + this.boxSize * 2, y + gapSize],
-        [x + this.boxSize, y + gapSize],
-        [x + this.boxSize, y + gapSize * 2],
-        [x + this.boxSize * 2, y + gapSize * 2],
-        [x + this.boxSize * 2, y + gapSize * 3],
-        [x + this.boxSize, y + gapSize * 3],
-        [x + this.boxSize, y + gapSize * 4],
-        [x + this.boxSize * 2, y + gapSize * 4],
-        [x + this.boxSize * 2, y + gapSize * 5],
+        [x + Config.blockSize * 2, y],
+        [x + Config.blockSize * 2, y + gapSize],
+        [x + Config.blockSize, y + gapSize],
+        [x + Config.blockSize, y + gapSize * 2],
+        [x + Config.blockSize * 2, y + gapSize * 2],
+        [x + Config.blockSize * 2, y + gapSize * 3],
+        [x + Config.blockSize, y + gapSize * 3],
+        [x + Config.blockSize, y + gapSize * 4],
+        [x + Config.blockSize * 2, y + gapSize * 4],
+        [x + Config.blockSize * 2, y + gapSize * 5],
         [x, y + gapSize * 5],
         [x, y],
       ],
-      { fill: this.colors.E, seed: this.Seed }
+      { fill: this.colors.E }
     );
   }
 
   private renderR(x: number, y: number) {
-    this.canvas.polygon(
+    this.rough.polygon(
       [
         [x, y],
-        [x + this.boxSize * 2, y],
-        [x + this.boxSize * 2, y + this.boxSize * 2],
-        [x + this.boxSize, y + this.boxSize * 2],
-        [x + this.boxSize * 2, y + this.boxSize * 3],
-        [x + ((this.boxSize * 2) / 3) * 2, y + this.boxSize * 3],
-        [x + (this.boxSize * 2) / 3, y + this.boxSize * 2.5],
-        [x + (this.boxSize * 2) / 3, y + this.boxSize * 3],
-        [x, y + this.boxSize * 3],
+        [x + Config.blockSize * 2, y],
+        [x + Config.blockSize * 2, y + Config.blockSize * 2],
+        [x + Config.blockSize, y + Config.blockSize * 2],
+        [x + Config.blockSize * 2, y + Config.blockSize * 3],
+        [x + ((Config.blockSize * 2) / 3) * 2, y + Config.blockSize * 3],
+        [x + (Config.blockSize * 2) / 3, y + Config.blockSize * 2.5],
+        [x + (Config.blockSize * 2) / 3, y + Config.blockSize * 3],
+        [x, y + Config.blockSize * 3],
         [x, y],
       ],
-      { fill: this.colors.R, seed: this.Seed }
+      { fill: this.colors.R }
     );
 
-    this.canvas.rectangle(
-      x + this.boxSize / 1.5,
-      y + this.boxSize / 1.5,
-      this.boxSize * 0.75,
-      this.boxSize * 0.75,
-      { fill: "white", fillStyle: "solid", seed: this.Seed }
+    this.rough.rectangle(
+      x + Config.blockSize / 1.5,
+      y + Config.blockSize / 1.5,
+      Config.blockSize * 0.75,
+      Config.blockSize * 0.75,
+      { fill: "white", fillStyle: "solid" }
     );
   }
 
   private renderI(x: number, y: number) {
-    this.canvas.rectangle(x, y, this.boxSize, this.boxSize * 3, {
+    this.rough.rectangle(x, y, Config.blockSize, Config.blockSize * 3, {
       fill: this.colors.I,
-      seed: this.Seed
     });
   }
 
   private renderS(x: number, y: number) {
-    const gapSize = (3 / 5) * this.boxSize;
+    const gapSize = (3 / 5) * Config.blockSize;
 
-    this.canvas.polygon(
+    this.rough.polygon(
       [
         [x, y],
-        [x + this.boxSize * 2, y],
-        [x + this.boxSize * 2, y + gapSize],
+        [x + Config.blockSize * 2, y],
+        [x + Config.blockSize * 2, y + gapSize],
         [x + gapSize, y + gapSize],
         [x + gapSize, y + gapSize * 2],
-        [x + this.boxSize * 2, y + gapSize * 2],
-        [x + this.boxSize * 2, y + gapSize * 5],
+        [x + Config.blockSize * 2, y + gapSize * 2],
+        [x + Config.blockSize * 2, y + gapSize * 5],
         [x, y + gapSize * 5],
         [x, y + gapSize * 4],
-        [x + this.boxSize * 2 - gapSize, y + gapSize * 4],
-        [x + this.boxSize * 2 - gapSize, y + gapSize * 3],
+        [x + Config.blockSize * 2 - gapSize, y + gapSize * 4],
+        [x + Config.blockSize * 2 - gapSize, y + gapSize * 3],
         [x, y + gapSize * 3],
       ],
-      { fill: this.colors.S, seed: this.Seed }
+      { fill: this.colors.S }
     );
   }
 
   public render() {
-    let x = 65;
-    let y = 100;
+    var x = 65;
+    this.renderT(x, this.TitlePosition.y);
+    this.renderE((x += 5) + Config.blockSize * 3, this.TitlePosition.y);
+    this.renderT((x += 5) + Config.blockSize * (3 + 2), this.TitlePosition.y);
+    this.renderR((x += 5) + Config.blockSize * (3 + 2 + 3), this.TitlePosition.y);
+    this.renderI((x += 5) + Config.blockSize * (3 + 2 + 3 + 2), this.TitlePosition.y);
+    this.renderS((x += 5) + Config.blockSize * (3 + 2 + 3 + 2 + 1), this.TitlePosition.y);
 
-    this.renderT(x, y);
-    this.renderE((x += 5) + this.boxSize * 3, y);
-    this.renderT((x += 5) + this.boxSize * (3 + 2), y);
-    this.renderR((x += 5) + this.boxSize * (3 + 2 + 3), y);
-    this.renderI((x += 5) + this.boxSize * (3 + 2 + 3 + 2), y);
-    this.renderS((x += 5) + this.boxSize * (3 + 2 + 3 + 2 + 1), y);
+    this.graphics.save();
+    this.graphics.textBaseline = "middle";
+    this.graphics.textAlign = "center";
+    this.graphics.font = "18px 'Press Start 2P'";
+    this.graphics.fillStyle = `rgba(0, 0, 0, ${this.textOpacity})`;
+    this.graphics.fillText("Tap to start", Config.Resolution.width / 2, 400);
+    this.graphics.restore();
   }
 }
 
