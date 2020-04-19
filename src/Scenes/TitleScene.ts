@@ -4,6 +4,8 @@ import anime from "animejs";
 import GameScene from "./GameScene";
 import { NormalizedInputEvent } from "../Engine/InputManager";
 
+const baseUnit = 16;
+
 class TitleScene extends Scene {
   private colors = {
     T: "red",
@@ -51,13 +53,13 @@ class TitleScene extends Scene {
     this.rough.polygon(
       [
         [x, y],
-        [x + Config.blockSize * 3, y],
-        [x + Config.blockSize * 3, y + Config.blockSize],
-        [x + Config.blockSize * 2, y + Config.blockSize],
-        [x + Config.blockSize * 2, y + Config.blockSize * 3],
-        [x + Config.blockSize, y + Config.blockSize * 3],
-        [x + Config.blockSize, y + Config.blockSize],
-        [x, y + Config.blockSize],
+        [x + baseUnit * 3, y],
+        [x + baseUnit * 3, y + baseUnit],
+        [x + baseUnit * 2, y + baseUnit],
+        [x + baseUnit * 2, y + baseUnit * 3],
+        [x + baseUnit, y + baseUnit * 3],
+        [x + baseUnit, y + baseUnit],
+        [x, y + baseUnit],
         [x, y],
       ],
       { fill: this.colors.T }
@@ -65,20 +67,20 @@ class TitleScene extends Scene {
   }
 
   private renderE(x: number, y: number) {
-    const gapSize = (3 / 5) * Config.blockSize;
+    const gapSize = (3 / 5) * baseUnit;
     this.rough.polygon(
       [
         [x, y],
-        [x + Config.blockSize * 2, y],
-        [x + Config.blockSize * 2, y + gapSize],
-        [x + Config.blockSize, y + gapSize],
-        [x + Config.blockSize, y + gapSize * 2],
-        [x + Config.blockSize * 2, y + gapSize * 2],
-        [x + Config.blockSize * 2, y + gapSize * 3],
-        [x + Config.blockSize, y + gapSize * 3],
-        [x + Config.blockSize, y + gapSize * 4],
-        [x + Config.blockSize * 2, y + gapSize * 4],
-        [x + Config.blockSize * 2, y + gapSize * 5],
+        [x + baseUnit * 2, y],
+        [x + baseUnit * 2, y + gapSize],
+        [x + baseUnit, y + gapSize],
+        [x + baseUnit, y + gapSize * 2],
+        [x + baseUnit * 2, y + gapSize * 2],
+        [x + baseUnit * 2, y + gapSize * 3],
+        [x + baseUnit, y + gapSize * 3],
+        [x + baseUnit, y + gapSize * 4],
+        [x + baseUnit * 2, y + gapSize * 4],
+        [x + baseUnit * 2, y + gapSize * 5],
         [x, y + gapSize * 5],
         [x, y],
       ],
@@ -90,50 +92,50 @@ class TitleScene extends Scene {
     this.rough.polygon(
       [
         [x, y],
-        [x + Config.blockSize * 2, y],
-        [x + Config.blockSize * 2, y + Config.blockSize * 2],
-        [x + Config.blockSize, y + Config.blockSize * 2],
-        [x + Config.blockSize * 2, y + Config.blockSize * 3],
-        [x + ((Config.blockSize * 2) / 3) * 2, y + Config.blockSize * 3],
-        [x + (Config.blockSize * 2) / 3, y + Config.blockSize * 2.5],
-        [x + (Config.blockSize * 2) / 3, y + Config.blockSize * 3],
-        [x, y + Config.blockSize * 3],
+        [x + baseUnit * 2, y],
+        [x + baseUnit * 2, y + baseUnit * 2],
+        [x + baseUnit, y + baseUnit * 2],
+        [x + baseUnit * 2, y + baseUnit * 3],
+        [x + ((baseUnit * 2) / 3) * 2, y + baseUnit * 3],
+        [x + (baseUnit * 2) / 3, y + baseUnit * 2.5],
+        [x + (baseUnit * 2) / 3, y + baseUnit * 3],
+        [x, y + baseUnit * 3],
         [x, y],
       ],
       { fill: this.colors.R }
     );
 
     this.rough.rectangle(
-      x + Config.blockSize / 1.5,
-      y + Config.blockSize / 1.5,
-      Config.blockSize * 0.75,
-      Config.blockSize * 0.75,
+      x + baseUnit / 1.5,
+      y + baseUnit / 1.5,
+      baseUnit * 0.75,
+      baseUnit * 0.75,
       { fill: "white", fillStyle: "solid" }
     );
   }
 
   private renderI(x: number, y: number) {
-    this.rough.rectangle(x, y, Config.blockSize, Config.blockSize * 3, {
+    this.rough.rectangle(x, y, baseUnit, baseUnit * 3, {
       fill: this.colors.I,
     });
   }
 
   private renderS(x: number, y: number) {
-    const gapSize = (3 / 5) * Config.blockSize;
+    const gapSize = (3 / 5) * baseUnit;
 
     this.rough.polygon(
       [
         [x, y],
-        [x + Config.blockSize * 2, y],
-        [x + Config.blockSize * 2, y + gapSize],
+        [x + baseUnit * 2, y],
+        [x + baseUnit * 2, y + gapSize],
         [x + gapSize, y + gapSize],
         [x + gapSize, y + gapSize * 2],
-        [x + Config.blockSize * 2, y + gapSize * 2],
-        [x + Config.blockSize * 2, y + gapSize * 5],
+        [x + baseUnit * 2, y + gapSize * 2],
+        [x + baseUnit * 2, y + gapSize * 5],
         [x, y + gapSize * 5],
         [x, y + gapSize * 4],
-        [x + Config.blockSize * 2 - gapSize, y + gapSize * 4],
-        [x + Config.blockSize * 2 - gapSize, y + gapSize * 3],
+        [x + baseUnit * 2 - gapSize, y + gapSize * 4],
+        [x + baseUnit * 2 - gapSize, y + gapSize * 3],
         [x, y + gapSize * 3],
       ],
       { fill: this.colors.S }
@@ -143,11 +145,11 @@ class TitleScene extends Scene {
   public render() {
     var x = 65;
     this.renderT(x, this.TitlePosition.y);
-    this.renderE((x += 5) + Config.blockSize * 3, this.TitlePosition.y);
-    this.renderT((x += 5) + Config.blockSize * (3 + 2), this.TitlePosition.y);
-    this.renderR((x += 5) + Config.blockSize * (3 + 2 + 3), this.TitlePosition.y);
-    this.renderI((x += 5) + Config.blockSize * (3 + 2 + 3 + 2), this.TitlePosition.y);
-    this.renderS((x += 5) + Config.blockSize * (3 + 2 + 3 + 2 + 1), this.TitlePosition.y);
+    this.renderE((x += 5) + baseUnit * 3, this.TitlePosition.y);
+    this.renderT((x += 5) + baseUnit * (3 + 2), this.TitlePosition.y);
+    this.renderR((x += 5) + baseUnit * (3 + 2 + 3), this.TitlePosition.y);
+    this.renderI((x += 5) + baseUnit * (3 + 2 + 3 + 2), this.TitlePosition.y);
+    this.renderS((x += 5) + baseUnit * (3 + 2 + 3 + 2 + 1), this.TitlePosition.y);
 
     this.graphics.save();
     this.graphics.textBaseline = "middle";

@@ -28,10 +28,10 @@ class Score {
     this.graphics.textAlign = "center";  
     this.graphics.textBaseline = "middle";
     this.graphics.fillStyle = 'rgba(0, 0, 0)';
-    this.graphics.fillText("Score", Config.Resolution.width - 30, 10);
+    this.graphics.fillText("Score", Config.Resolution.width - 50, 10);
     
     this.graphics.font = "16px 'Press Start 2P'";
-    this.graphics.fillText(this.value.toString(), Config.Resolution.width - 30, 30);
+    this.graphics.fillText(this.value.toString(), Config.Resolution.width - 50, 30);
 
 
     this.graphics.restore();

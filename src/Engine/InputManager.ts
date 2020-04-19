@@ -1,5 +1,6 @@
 import SwipeListener from "swipe-listener";
 import Config from "../Config";
+import throttle from "lodash.throttle";
 
 export enum NormalizedInputEvent {
   RIGHT = "input:right",
@@ -17,14 +18,15 @@ type InputManagerCallback = (e: CustomEvent<NormalizedInputEvent>) => void;
 class InputManager {
   private swipeListener;
   constructor() {
-    window.addEventListener("keypress", this.handleKeyboard);
+    window.addEventListener("keydown", this.handleKeyboard);
     window.addEventListener("click", this.handleClick);
 
     this.swipeListener = new SwipeListener(window);
 
     // @ts-ignore
+    window.addEventListener("touchstart", this.handleMouseDown);
+    window.addEventListener("touchend", this.handleMouseUp);
     window.addEventListener("swiping", this.handleSwiping);
-    window.addEventListener("mouseup", this.handleMouseUp);
   }
 
   public on(event: NormalizedInputEvent, callback: InputManagerCallback) {
@@ -65,7 +67,8 @@ class InputManager {
   private handleSwiping = (e: CustomEvent) => {
     const {detail: {x, y}} = e;
     if (!this.lastSwipingPosition) {
-      this.lastSwipingPosition = [x[0], y[0]];
+      console.error("Swiping without origin?¿");
+      return;
     }
 
     const isLeft = x[1] - this.lastSwipingPosition[0] < -Config.blockSize;
@@ -91,10 +94,9 @@ class InputManager {
       this.Trigger(NormalizedInputEvent.RIGHT);
       return;
     }
-
-
   }
 
+  private handleMouseDown = (e: TouchEvent) => this.lastSwipingPosition = [e.touches[0].pageX, e.touches[0].pageY];
   private handleMouseUp = () => this.lastSwipingPosition = null;
 
   private handleClick = (e: MouseEvent) => {

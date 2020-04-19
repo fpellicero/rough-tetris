@@ -39,6 +39,7 @@ class GameScene extends Scene {
   private NextPiecePreview?: PiecePreview;
   private State: States = States.PLAYING;
   private Score?: Score;
+  private _combo: number;
 
   private Speed = 300;
   public create() {
@@ -63,7 +64,7 @@ class GameScene extends Scene {
       ](this.rough, { x: 0, y: 0 });
 
     if (this.nextPieces.length === 0) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 1; i++) {
         this.nextPieces.push(randomPiece());
       }
     }
@@ -140,6 +141,7 @@ class GameScene extends Scene {
           this.currentPiece = undefined;
 
           this.State = States.SCORING;
+          this._combo = 0;
         }
       }
     }
@@ -151,10 +153,10 @@ class GameScene extends Scene {
         if (!this._checkGameOver()) {
           this.State = States.PLAYING;
         }
-
       } else {
-        this.Score.add(100);
-        this.Speed -= 20;
+        this._combo++;
+        this.Score.add(((1000 - this.Speed) / 10) * this._combo);
+        this.Speed -= 10;
       }
     }
   }
