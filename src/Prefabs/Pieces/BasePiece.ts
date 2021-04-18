@@ -61,17 +61,7 @@ abstract class BasePiece {
 
     const nextBlocks = this.getOccupiedCells(nextPosition);
 
-    const isBlocked = nextBlocks.find(([x, y]) => {
-      if (x < 0 || x > boardMatrix.length - 1) {
-        return true;
-      }
-
-      if (y < 0 || y > boardMatrix[0].length - 1) {
-        return true;
-      }
-
-      return boardMatrix[x][y];
-    });
+    const isBlocked = this._isBlocked(nextBlocks, boardMatrix);
 
     if (isBlocked) {
       return false;
@@ -83,8 +73,36 @@ abstract class BasePiece {
     return true;
   }
 
-  public rotate() {
+  private _isBlocked(occupiedCells: number[][], boardMatrix: string[][]) {
+    return occupiedCells.find(([x, y]) => {
+      if (x < 0 || x > boardMatrix.length - 1) {
+        return true;
+      }
+
+      if (y < 0 || y > boardMatrix[0].length - 1) {
+        return true;
+      }
+
+      return boardMatrix[x][y];
+    });
+  }
+
+  public rotate(boardMatrix: string[][]) {
+    
+    const _prevRotation = this.rotation;
+
     this.rotation = ((this.rotation + 90) % 360) as TRotation;
+
+    /*
+     * Check if the rotation has moved the piece into an
+     * occupied cell, and restore previous rotation if so.
+     */
+    const cells = this.getOccupiedCells();
+
+
+    if (this._isBlocked(cells, boardMatrix)) {
+      this.rotation = _prevRotation;
+    }    
   }
 
   public render() {

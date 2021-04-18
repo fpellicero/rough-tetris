@@ -105,7 +105,7 @@ class GameScene extends Scene {
           this.restartGame();
           return;
         }
-        this.currentPiece?.rotate();
+        this.currentPiece?.rotate(this.Board.Matrix);
         break;
     }
   };
